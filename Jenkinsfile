@@ -42,10 +42,21 @@ pipeline {
         stage('Run for Verification') {
             steps {
                 echo 'Starting app on port 8081 for 10 seconds to verify...'
-                // This starts the app, waits 10 seconds, then kills it so the pipeline can finish
-                bat "start /B java -jar target/*.jar --server.port=8081"
-                bat "timeout /t 10"
-                bat "taskkill /F /IM java.exe /T"
+
+                bat """
+                    @echo off
+                    :: Find the exact name of the JAR file and store it in a variable
+                    for %%i in (target\\*.jar) do set JAR_NAME=%%i
+
+                    :: Start the app in the background
+                    start /B java -jar %JAR_NAME% --server.port=8081
+
+                    :: Wait for 10 seconds (using 'ping' is a reliable hack for Jenkins on Windows)
+                    ping 127.0.0.1 -n 10 > nul
+
+                    :: Kill the process so the build can finish
+                    taskkill /F /IM java.exe /T || echo "App already closed"
+                """
             }
         }
     }
