@@ -31,5 +31,12 @@ pipeline {
                 echo 'Build and Test complete! The JAR is ready in the target folder.'
             }
         }
+
+        stage('Archive Artifacts') {
+             steps {
+                 // This tells Jenkins to save the JAR file so you can download it from the UI
+                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+             }
+        }
     }
 }
