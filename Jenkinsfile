@@ -38,5 +38,15 @@ pipeline {
                  archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
              }
         }
+
+        stage('Run for Verification') {
+            steps {
+                echo 'Starting app on port 8081 for 10 seconds to verify...'
+                // This starts the app, waits 10 seconds, then kills it so the pipeline can finish
+                bat "start /B java -jar target/*.jar --server.port=8081"
+                bat "timeout /t 10"
+                bat "taskkill /F /IM java.exe /T"
+            }
+        }
     }
 }
